@@ -85,7 +85,6 @@ export function TradePanel({
     query: {
       enabled: !!address && mode === 'invest',
       staleTime: 10_000,
-      queryKey: ['allowance', 'usdt', address, routerAddress],
     },
   });
 
@@ -99,7 +98,6 @@ export function TradePanel({
     query: {
       enabled: !!address && mode === 'redeem',
       staleTime: 10_000,
-      queryKey: ['allowance', 'etf', address, routerAddress],
     },
   });
 
