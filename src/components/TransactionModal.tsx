@@ -63,36 +63,66 @@ export function TransactionModal({ isOpen, status, txHash, chainId = 97, onClose
         {/* Progress Steps */}
         {isLoading && (
           <div className="space-y-2 mb-6">
-            {/* Only show approval step if status mentions approving */}
-            {(status.includes('Approving') || status.includes('Checking') || status.includes('approval')) && (
-              <div className="flex items-center text-sm">
-                <div className={`w-2 h-2 rounded-full mr-2 ${
-                  status.includes('Approving') && !status.includes('already') ? 'bg-blue-600 animate-pulse' :
-                  status.includes('already') ? 'bg-green-600' : 'bg-blue-600 animate-pulse'
-                }`}></div>
-                <span className={
-                  status.includes('Approving') || status.includes('Checking') ? 'text-gray-900 font-medium' : 'text-gray-500'
-                }>
-                  {status.includes('already') ? '✓ Token approved' : 'Checking/Approving tokens'}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center text-sm">
-              <div className={`w-2 h-2 rounded-full mr-2 ${
-                status.includes('Minting') || status.includes('Burning') ? 'bg-blue-600 animate-pulse' : 'bg-gray-300'
-              }`}></div>
-              <span className={status.includes('Minting') || status.includes('Burning') ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                {status.includes('Burning') ? 'Burning shares' : 'Minting shares'}
-              </span>
-            </div>
-            <div className="flex items-center text-sm">
-              <div className={`w-2 h-2 rounded-full mr-2 ${
-                status.includes('confirmation') ? 'bg-blue-600 animate-pulse' : 'bg-gray-300'
-              }`}></div>
-              <span className={status.includes('confirmation') ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                Confirming on blockchain
-              </span>
-            </div>
+            {/* Determine transaction type based on status */}
+            {(() => {
+              const isApproveOnly = (status.includes('Approving') || status.includes('approval')) &&
+                                    !status.includes('Minting') && !status.includes('Burning');
+              const isMinting = status.includes('Minting');
+              const isBurning = status.includes('Burning');
+              const isConfirming = status.includes('confirmation');
+
+              if (isApproveOnly) {
+                // Approve transaction only
+                return (
+                  <>
+                    <div className="flex items-center text-sm">
+                      <div className="w-2 h-2 rounded-full mr-2 bg-blue-600 animate-pulse"></div>
+                      <span className="text-gray-900 font-medium">
+                        {status.includes('Approving') ? 'Approving tokens...' : 'Processing approval...'}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className={`w-2 h-2 rounded-full mr-2 ${isConfirming ? 'bg-blue-600 animate-pulse' : 'bg-gray-300'}`}></div>
+                      <span className={isConfirming ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                        Confirming on blockchain
+                      </span>
+                    </div>
+                  </>
+                );
+              } else {
+                // Invest/Redeem transaction
+                return (
+                  <>
+                    {(status.includes('Checking') || status.includes('approval')) && (
+                      <div className="flex items-center text-sm">
+                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                          status.includes('already') ? 'bg-green-600' : 'bg-blue-600 animate-pulse'
+                        }`}></div>
+                        <span className={
+                          status.includes('Checking') ? 'text-gray-900 font-medium' : 'text-gray-500'
+                        }>
+                          {status.includes('already') ? '✓ Token approved' : 'Checking approval'}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center text-sm">
+                      <div className={`w-2 h-2 rounded-full mr-2 ${
+                        isMinting || isBurning ? 'bg-blue-600 animate-pulse' : 'bg-gray-300'
+                      }`}></div>
+                      <span className={isMinting || isBurning ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                        {isBurning ? 'Burning shares...' : 'Minting shares...'}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className={`w-2 h-2 rounded-full mr-2 ${isConfirming ? 'bg-blue-600 animate-pulse' : 'bg-gray-300'}`}></div>
+                      <span className={isConfirming ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                        Confirming on blockchain
+                      </span>
+                    </div>
+                  </>
+                );
+              }
+            })()}
           </div>
         )}
 

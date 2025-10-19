@@ -5,11 +5,10 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId,
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { maxUint256 } from 'viem';
 import { ETFOverview } from '@/components/ETFOverview';
 import { MyHoldings } from '@/components/MyHoldings';
 import { TradePanel } from '@/components/TradePanel';
-import { TransactionModal } from '@/components/TransactionModal';
+import { Toast, ToastType } from '@/components/Toast';
 import { useBlockETFData } from '@/hooks/useBlockETF';
 import { erc20ABI, etfRouterABI, blockETFCoreABI } from '@/lib/contracts/abis';
 import { getContractAddress } from '@/lib/contracts/addresses';
@@ -32,9 +31,11 @@ export default function Home() {
   });
 
 
-  const [txStatus, setTxStatus] = useState<string>('');
-  const [showTxModal, setShowTxModal] = useState<boolean>(false);
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [toastType, setToastType] = useState<ToastType>('loading');
+  const [toastMessage, setToastMessage] = useState<string>('');
   const [lastTxHash, setLastTxHash] = useState<`0x${string}` | undefined>();
+  const [isInvestRedeemProcessing, setIsInvestRedeemProcessing] = useState<boolean>(false);
   const { writeContractAsync } = useWriteContract();
 
   // Wait for transaction confirmation
@@ -49,14 +50,19 @@ export default function Home() {
   // Refresh data when transaction is confirmed
   useEffect(() => {
     if (isTxConfirmed && lastTxHash) {
-      setTxStatus('Transaction confirmed! Refreshing data...');
+      console.log('[Transaction] Confirmed, showing success and refreshing data...');
 
-      // Invalidate all queries to force refetch
-      setTimeout(() => {
-        queryClient.invalidateQueries();
-        setTxStatus('All data updated successfully! 🎉');
-        // Don't auto-close, let user close manually
-      }, 1500);
+      // Show success toast immediately
+      setToastType('success');
+      setToastMessage('Transaction confirmed successfully!');
+
+      // Reset processing state
+      setIsInvestRedeemProcessing(false);
+
+      // Then force refetch all queries to update UI
+      queryClient.refetchQueries().then(() => {
+        console.log('[Transaction] All data refreshed');
+      });
     }
   }, [isTxConfirmed, lastTxHash, queryClient]);
 
@@ -65,7 +71,13 @@ export default function Home() {
     if (isTxFailed && lastTxHash) {
       console.error('[Transaction] Failed:', lastTxHash, txError);
       const errorMsg = txError instanceof Error ? txError.message : 'Transaction failed';
-      setTxStatus(`❌ Transaction failed: ${errorMsg}`);
+
+      // Show error toast
+      setToastType('error');
+      setToastMessage(errorMsg);
+
+      // Reset processing state
+      setIsInvestRedeemProcessing(false);
     }
   }, [isTxFailed, lastTxHash, txError]);
 
@@ -103,93 +115,27 @@ export default function Home() {
     },
   });
 
-  // Helper function to check and approve if needed (with unlimited approval)
-  const ensureApproval = async (
-    tokenAddress: `0x${string}`,
-    spenderAddress: `0x${string}`,
-    requiredAmount: bigint,
-    tokenName: string
-  ) => {
-    if (!address) return false;
-
-    try {
-      setTxStatus(`Checking ${tokenName} allowance...`);
-
-      // Import viem utilities once
-      const { readContract, waitForTransactionReceipt } = await import('viem/actions');
-      const { createPublicClient, http } = await import('viem');
-      const { bsc, bscTestnet } = await import('viem/chains');
-
-      // Select the correct chain and RPC URL
-      const chain = chainId === 56 ? bsc : bscTestnet;
-      const rpcUrl = chainId === 56
-        ? 'https://bsc-dataseed.binance.org'
-        : 'https://data-seed-prebsc-1-s1.binance.org:8545';
-
-      const publicClient = createPublicClient({
-        chain,
-        transport: http(rpcUrl),
-      });
-
-      // Check current allowance
-      const currentAllowance = await readContract(publicClient, {
-        address: tokenAddress,
-        abi: erc20ABI,
-        functionName: 'allowance',
-        args: [address, spenderAddress],
-      }) as bigint;
-
-      // If allowance is sufficient, skip approval
-      if (currentAllowance >= requiredAmount) {
-        setTxStatus(`${tokenName} already approved, proceeding...`);
-        return true;
-      }
-
-      // Need to approve
-      setTxStatus(`Approving ${tokenName} (one-time unlimited approval)...`);
-
-      const approveTx = await writeContractAsync({
-        address: tokenAddress,
-        abi: erc20ABI,
-        functionName: 'approve',
-        args: [spenderAddress, maxUint256], // Unlimited approval
-      });
-
-      setTxStatus('Approval submitted, waiting for confirmation...');
-
-      // Wait for approval transaction to be mined
-      const receipt = await waitForTransactionReceipt(publicClient, {
-        hash: approveTx,
-        confirmations: 2, // Wait for 2 confirmations
-      });
-
-      if (receipt.status === 'reverted') {
-        throw new Error('Approval transaction reverted');
-      }
-
-      setTxStatus(`${tokenName} approved successfully!`);
-
-      return true;
-    } catch (error) {
-      console.error('[Approval] Error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setTxStatus(`Approval failed: ${errorMessage}`);
-      throw error;
+  // Handle toast display from TradePanel
+  const handleShowToast = (type: ToastType, message: string, txHash?: `0x${string}`) => {
+    setShowToast(true);
+    setToastType(type);
+    setToastMessage(message);
+    if (txHash) {
+      setLastTxHash(txHash);
     }
   };
 
+  // Handle invest transaction (approval is now handled by TradePanel)
   const handleInvest = async (shares: bigint, maxUSDT: bigint) => {
     if (!address) return;
 
     try {
-      setShowTxModal(true);
+      setIsInvestRedeemProcessing(true);
+      setShowToast(true);
+      setToastType('loading');
+      setToastMessage('Minting ETF shares...');
 
-      // 1. Check and approve USDT if needed (unlimited approval for better UX)
-      await ensureApproval(usdtAddress, routerAddress, maxUSDT, 'USDT');
-
-      setTxStatus('Minting ETF shares...');
-
-      // 2. Call router.mintExactShares
+      // Call router.mintExactShares
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600); // 10 minutes
 
       const mintTx = await writeContractAsync({
@@ -200,28 +146,29 @@ export default function Home() {
         gas: BigInt(1500000),
       });
 
-      setTxStatus('Waiting for transaction confirmation...');
+      setToastMessage('Waiting for confirmation...');
       setLastTxHash(mintTx);
     } catch (error) {
       console.error('Invest error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
-      setTxStatus(`Error: ${errorMessage}`);
-      // Don't auto-close, let user close manually
+
+      setToastType('error');
+      setToastMessage(errorMessage);
+      setIsInvestRedeemProcessing(false);
     }
   };
 
+  // Handle redeem transaction (approval is now handled by TradePanel)
   const handleRedeem = async (shares: bigint, minUSDT: bigint) => {
     if (!address) return;
 
     try {
-      setShowTxModal(true);
+      setIsInvestRedeemProcessing(true);
+      setShowToast(true);
+      setToastType('loading');
+      setToastMessage('Burning ETF shares...');
 
-      // 1. Check and approve ETF shares if needed (unlimited approval for better UX)
-      await ensureApproval(etfCoreAddress, routerAddress, shares, 'ETF shares');
-
-      setTxStatus('Burning ETF shares...');
-
-      // 2. Call router.burnToUSDT
+      // Call router.burnToUSDT
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600); // 10 minutes
 
       const burnTx = await writeContractAsync({
@@ -232,28 +179,30 @@ export default function Home() {
         gas: BigInt(1500000),
       });
 
-      setTxStatus('Waiting for transaction confirmation...');
+      setToastMessage('Waiting for confirmation...');
       setLastTxHash(burnTx);
     } catch (error) {
       console.error('Redeem error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
-      setTxStatus(`Error: ${errorMessage}`);
-      // Don't auto-close, let user close manually
+
+      setToastType('error');
+      setToastMessage(errorMessage);
+      setIsInvestRedeemProcessing(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
-      {/* Transaction Modal */}
-      <TransactionModal
-        isOpen={showTxModal}
-        status={txStatus}
+      {/* Toast Notification */}
+      <Toast
+        isOpen={showToast}
+        type={toastType}
+        message={toastMessage}
         txHash={lastTxHash}
         chainId={chainId}
         onClose={() => {
-          setShowTxModal(false);
-          setTxStatus('');
-          setLastTxHash(undefined);
+          setShowToast(false);
+          setToastMessage('');
         }}
       />
 
@@ -470,6 +419,8 @@ export default function Home() {
               isConnected={isConnected}
               onInvest={handleInvest}
               onRedeem={handleRedeem}
+              onShowToast={handleShowToast}
+              isParentProcessing={isInvestRedeemProcessing}
             />
           </div>
         </div>
