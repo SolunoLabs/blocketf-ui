@@ -6,6 +6,7 @@ import { useAccount, useChainId, useReadContract, useWaitForTransactionReceipt, 
 import { useQueryClient } from '@tanstack/react-query'
 import { ETFOverview } from '@/components/ETFOverview'
 import { MyHoldings } from '@/components/MyHoldings'
+import { SiteFooter } from '@/components/shared/SiteFooter'
 import { TradePanel } from '@/components/TradePanel'
 import { Toast, type ToastType } from '@/components/Toast'
 import { useBlockETFData } from '@/hooks/useBlockETF'
@@ -156,6 +157,8 @@ export function V1LegacyPage() {
           />
           <MyHoldings isConnected={isConnected} />
         </div>
+
+        <SiteFooter />
       </div>
     </main>
   )

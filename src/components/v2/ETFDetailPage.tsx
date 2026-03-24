@@ -6,6 +6,7 @@ import { useBlockETFV2ETF } from '@/hooks/v2/useBlockETFV2ETF'
 import { V2_APP_CONFIG } from '@/lib/contracts/config'
 import { formatBps, formatCompactCurrency, formatCurrency, formatTokenAmount, shortAddress } from '@/lib/format'
 import { type Address } from '@/lib/contracts/addresses'
+import { SiteFooter } from '@/components/shared/SiteFooter'
 import { V2NotConfigured } from './V2NotConfigured'
 import { V2TradePanel } from './V2TradePanel'
 import { V2PortfolioTable } from './V2PortfolioTable'
@@ -130,6 +131,8 @@ export function ETFDetailPage({ etfAddress, featured = false }: ETFDetailPagePro
             Open V1 legacy
           </Link>
         </section>
+
+        <SiteFooter />
       </div>
     </main>
   )

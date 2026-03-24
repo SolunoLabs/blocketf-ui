@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SiteFooter } from '@/components/shared/SiteFooter'
 import { V2Header } from '@/components/v2/V2Header'
 
 const composition = [
@@ -201,6 +202,8 @@ export default function AboutPage() {
             ))}
           </div>
         </section>
+
+        <SiteFooter />
       </div>
     </main>
   )
