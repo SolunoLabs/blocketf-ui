@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: process.cwd(),
   webpack: (config) => {
     // Ignore optional dependencies that are not needed in browser environment
     config.externals.push('pino-pretty', 'encoding');

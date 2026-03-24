@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local planning docs
+FRONTEND_V2_IMPLEMENTATION_CHECKLIST.md
+FRONTEND_V2_PRD.md
+V2_DEPLOYMENT_INTEGRATION.md
+VISUAL_DIRECTION_V2.md

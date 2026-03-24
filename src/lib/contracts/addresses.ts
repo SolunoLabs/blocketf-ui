@@ -1,5 +1,11 @@
-// Contract addresses - will be updated after deployment
-// TODO: Update these addresses after deploying to testnet/mainnet
+export type Address = `0x${string}`;
+
+function parseEnvAddress(value?: string): Address | null {
+  if (!value) return null;
+  if (!/^0x[a-fA-F0-9]{40}$/.test(value)) return null;
+
+  return value as Address;
+}
 
 export const contractAddresses = {
   // BSC Testnet addresses - Updated 2025-10-11 (Router v2)
@@ -79,9 +85,65 @@ export const contractAddresses = {
 
 export type SupportedChainId = keyof typeof contractAddresses;
 
+export interface V2ContractsConfig {
+  factory: Address | null;
+  router: Address | null;
+  rebalancer: Address | null;
+  lens: Address | null;
+  priceOracle: Address | null;
+  featuredETFAddress: Address | null;
+  usdt: Address;
+}
+
+function resolveV2ContractsConfig(chainId: SupportedChainId): V2ContractsConfig {
+  const env =
+    chainId === 56
+      ? {
+          factory: process.env.NEXT_PUBLIC_V2_MAINNET_FACTORY,
+          router: process.env.NEXT_PUBLIC_V2_MAINNET_ROUTER,
+          rebalancer: process.env.NEXT_PUBLIC_V2_MAINNET_REBALANCER,
+          lens: process.env.NEXT_PUBLIC_V2_MAINNET_LENS,
+          priceOracle: process.env.NEXT_PUBLIC_V2_MAINNET_PRICE_ORACLE,
+          featuredETFAddress: process.env.NEXT_PUBLIC_V2_MAINNET_FEATURED_ETF,
+          usdt: process.env.NEXT_PUBLIC_V2_MAINNET_USDT,
+        }
+      : {
+          factory: process.env.NEXT_PUBLIC_V2_TESTNET_FACTORY,
+          router: process.env.NEXT_PUBLIC_V2_TESTNET_ROUTER,
+          rebalancer: process.env.NEXT_PUBLIC_V2_TESTNET_REBALANCER,
+          lens: process.env.NEXT_PUBLIC_V2_TESTNET_LENS,
+          priceOracle: process.env.NEXT_PUBLIC_V2_TESTNET_PRICE_ORACLE,
+          featuredETFAddress: process.env.NEXT_PUBLIC_V2_TESTNET_FEATURED_ETF,
+          usdt: process.env.NEXT_PUBLIC_V2_TESTNET_USDT,
+        };
+
+  return {
+    factory: parseEnvAddress(env.factory) ?? null,
+    router: parseEnvAddress(env.router) ?? null,
+    rebalancer: parseEnvAddress(env.rebalancer) ?? null,
+    lens: parseEnvAddress(env.lens) ?? null,
+    priceOracle: parseEnvAddress(env.priceOracle) ?? null,
+    featuredETFAddress: parseEnvAddress(env.featuredETFAddress) ?? null,
+    usdt: parseEnvAddress(env.usdt) ?? contractAddresses[chainId].usdt,
+  };
+}
+
+export const v2ContractAddresses: Record<SupportedChainId, V2ContractsConfig> = {
+  97: resolveV2ContractsConfig(97),
+  56: resolveV2ContractsConfig(56),
+};
+
+export function getSupportedChainId(chainId?: number): SupportedChainId {
+  return chainId === 56 || chainId === 97 ? chainId : 56;
+}
+
 export function getContractAddress(
   chainId: SupportedChainId,
   contract: keyof (typeof contractAddresses)[SupportedChainId]
 ): `0x${string}` {
   return contractAddresses[chainId][contract] as `0x${string}`;
+}
+
+export function getV2Contracts(chainId?: number): V2ContractsConfig {
+  return v2ContractAddresses[getSupportedChainId(chainId)];
 }

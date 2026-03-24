@@ -4,6 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract, useChainId } from 'wagmi';
 import { formatUnits } from 'viem';
 import Link from 'next/link';
+import Image from 'next/image';
 import { contractAddresses } from '@/lib/contracts/addresses';
 import { useEffect, useState } from 'react';
 
@@ -316,8 +317,8 @@ export default function FaucetPage() {
             {/* Left side: Logo + Desktop Navigation */}
             <div className="flex items-center space-x-6">
               <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/50">
-                  <span className="text-white font-bold text-lg sm:text-xl">B</span>
+                <div className="flex h-8 w-8 items-center justify-center sm:h-10 sm:w-10">
+                  <Image src="/blocketf-mark-mono.svg" alt="BlockETF" width={40} height={40} priority />
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   BlockETF

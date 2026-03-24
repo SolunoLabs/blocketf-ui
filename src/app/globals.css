@@ -1,49 +1,140 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #07111d;
+  --foreground: #f3f1ea;
+  --atlas-ink: #07111d;
+  --atlas-slate: #0c1824;
+  --atlas-panel: rgba(16, 28, 42, 0.84);
+  --atlas-panel-strong: rgba(10, 21, 33, 0.92);
+  --atlas-border: rgba(143, 183, 163, 0.18);
+  --atlas-border-strong: rgba(198, 165, 107, 0.22);
+  --atlas-text: #f3f1ea;
+  --atlas-text-muted: #c8d2dc;
+  --atlas-text-faint: #7c8b99;
+  --atlas-cyan: #7ec7c3;
+  --atlas-teal: #8fb7a3;
+  --atlas-brass: #c6a56b;
+  --atlas-success: #5fae8b;
+  --atlas-warning: #c9a15d;
+  --atlas-error: #b96a6a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", "Menlo", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #07111d;
+    --foreground: #f3f1ea;
   }
 }
 
+html {
+  background:
+    radial-gradient(circle at top left, rgba(126, 199, 195, 0.12), transparent 28%),
+    radial-gradient(circle at 85% 18%, rgba(198, 165, 107, 0.08), transparent 24%),
+    linear-gradient(180deg, #030814 0%, #07111d 48%, #040b15 100%);
+}
+
 body {
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(126, 199, 195, 0.28);
+  color: #ffffff;
+}
+
+.atlas-shell {
+  background:
+    radial-gradient(circle at top left, rgba(126, 199, 195, 0.12), transparent 28%),
+    radial-gradient(circle at 85% 18%, rgba(198, 165, 107, 0.08), transparent 24%),
+    linear-gradient(180deg, #030814 0%, #07111d 48%, #040b15 100%);
+}
+
+.atlas-panel {
+  background: var(--atlas-panel);
+  border: 1px solid var(--atlas-border);
+  box-shadow: 0 30px 90px rgba(5, 10, 20, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.atlas-panel-strong {
+  background: var(--atlas-panel-strong);
+  border: 1px solid var(--atlas-border-strong);
+  box-shadow: 0 34px 110px rgba(4, 9, 19, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+.atlas-subtle-panel {
+  background: rgba(6, 15, 24, 0.58);
+  border: 1px solid rgba(143, 183, 163, 0.14);
+}
+
+.atlas-kicker {
+  color: var(--atlas-cyan);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.atlas-title {
+  letter-spacing: -0.035em;
+}
+
+.atlas-brass-text {
+  color: var(--atlas-brass);
+}
+
+.atlas-primary-button {
+  background: linear-gradient(135deg, var(--atlas-teal) 0%, var(--atlas-cyan) 100%);
+  color: #07111d;
+}
+
+.atlas-primary-button:hover {
+  filter: brightness(1.03);
+}
+
+.atlas-secondary-button {
+  background: rgba(243, 241, 234, 0.06);
+  border: 1px solid rgba(243, 241, 234, 0.14);
+  color: var(--atlas-text);
+}
+
+.atlas-metric-value {
+  letter-spacing: -0.03em;
+}
+
+.atlas-grid-line {
+  border-color: rgba(143, 183, 163, 0.14);
 }
 
 /* RainbowKit Custom Styles */
 [data-rk] {
   /* Account dropdown menu */
   [role="dialog"] {
-    background: rgba(31, 41, 55, 0.95) !important;
+    background: rgba(12, 24, 36, 0.95) !important;
     backdrop-filter: blur(24px) !important;
-    border: 1px solid rgba(55, 65, 81, 0.7) !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(143, 183, 163, 0.18) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55) !important;
   }
 
   /* Dropdown menu items */
   [data-rk] > div[style*="background"] {
-    background: rgba(31, 41, 55, 0.95) !important;
+    background: rgba(12, 24, 36, 0.95) !important;
     backdrop-filter: blur(24px) !important;
-    border: 1px solid rgba(55, 65, 81, 0.7) !important;
+    border: 1px solid rgba(143, 183, 163, 0.18) !important;
   }
 
   /* Menu buttons hover state */
   button[role="menuitem"]:hover {
-    background: rgba(55, 65, 81, 0.5) !important;
+    background: rgba(143, 183, 163, 0.12) !important;
   }
 }

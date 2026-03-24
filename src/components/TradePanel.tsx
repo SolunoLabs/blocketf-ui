@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { formatUnits, parseUnits, maxUint256 } from 'viem';
 import { useReadContract, useChainId, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { useQueryClient } from '@tanstack/react-query';
 import { etfRouterABI, erc20ABI, blockETFCoreABI } from '@/lib/contracts/abis';
 import { getContractAddress } from '@/lib/contracts/addresses';
 import { ToastType } from '@/components/Toast';
@@ -27,7 +26,6 @@ export function TradePanel({
 }: TradePanelProps) {
   const chainId = useChainId();
   const { address } = useAccount();
-  const queryClient = useQueryClient();
   const { writeContractAsync } = useWriteContract();
 
   const routerAddress = getContractAddress(chainId as 56 | 97, 'etfRouter');

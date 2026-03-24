@@ -1,9 +1,9 @@
 // ETF Configuration
 
 export const ETF_CONFIG = {
-  name: "Crypto Top 5 Index",
-  symbol: "CT5",
-  description: "A diversified index of top 5 cryptocurrencies on BSC",
+  name: "BlockETF TOP Index",
+  symbol: "TOP",
+  description: "A diversified crypto index on BSC with core majors and an integrated USDT sleeve",
 
   // Fees in basis points (1 bp = 0.01%)
   fees: {
@@ -55,36 +55,42 @@ export const TESTNET_ASSETS: ETFAsset[] = [
   },
 ];
 
-// Assets for BSC Mainnet (5 assets)
+// Assets for BSC Mainnet (6 assets)
 export const MAINNET_ASSETS: ETFAsset[] = [
   {
     symbol: "BTCB",
     name: "Bitcoin BEP2",
-    weight: 2000, // 20%
+    weight: 2500, // 25%
     decimals: 18,
   },
   {
     symbol: "ETH",
     name: "Ethereum Token",
-    weight: 2000, // 20%
+    weight: 2500, // 25%
     decimals: 18,
   },
   {
     symbol: "WBNB",
     name: "Wrapped BNB",
-    weight: 2000, // 20%
+    weight: 1400, // 14%
     decimals: 18,
   },
   {
     symbol: "XRP",
     name: "Binance-Peg XRP",
-    weight: 2000, // 20%
+    weight: 1400, // 14%
     decimals: 18,
   },
   {
     symbol: "SOL",
     name: "Binance-Peg SOL",
-    weight: 2000, // 20%
+    weight: 1400, // 14%
+    decimals: 18,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    weight: 800, // 8%
     decimals: 18,
   },
 ];
@@ -129,3 +135,35 @@ export const NETWORK_CONFIG = {
 } as const;
 
 export type SupportedChainId = keyof typeof NETWORK_CONFIG;
+
+export const V2_APP_CONFIG = {
+  title: 'BlockETF TOP Index',
+  appTitle: 'BlockETF V2',
+  headline: 'Onchain ETF designed for long-term holders',
+  description:
+    'One token, six core assets, automatic rebalancing.',
+  featureHighlights: [
+    'Yield-bearing reserves through Venus integration',
+    'Stablecoin inventory treated as part of the portfolio design',
+    'Rebalancing-aware ETF structure instead of a static basket wrapper',
+  ],
+  legacyRoute: '/v1',
+  enableETFDirectory: false,
+  legacyV1Enabled: true,
+} as const;
+
+export const V2_FALLBACK_CONTENT = {
+  statusLabel: 'Configuration pending',
+  statusDescription:
+    'V2 frontend is live, but featured ETF and contract addresses have not been configured for this network yet.',
+  implementationNotes: [
+    'Set the V2 factory, router, lens, and featured ETF environment variables.',
+    'After addresses are configured, the same homepage will automatically read live ETF state.',
+    'V1 remains available under /v1 during the migration window.',
+  ],
+} as const;
+
+export function getExplorerBaseUrl(chainId: number): string {
+  const supportedChainId = chainId === 56 || chainId === 97 ? chainId : 56;
+  return NETWORK_CONFIG[supportedChainId].blockExplorer;
+}
