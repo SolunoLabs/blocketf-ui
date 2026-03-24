@@ -26,20 +26,11 @@ V1 remains available as a legacy route under `/v1`, but V2 is the primary app su
 
 ## Environment Variables
 
-Create `.env.local` with:
+None required for production deployment.
 
-```env
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
-NEXT_PUBLIC_V2_MAINNET_FACTORY=0x1362EF9Bf354E4CdEc2385fB341091a546874648
-NEXT_PUBLIC_V2_MAINNET_ROUTER=0x830Fd956dcB3f4F00325BA024AB7D2665faDA6C1
-NEXT_PUBLIC_V2_MAINNET_REBALANCER=0xcFf620c18af87dC5aF8959C0A4Ece22BE0702231
-NEXT_PUBLIC_V2_MAINNET_LENS=0xc3901bbB95B9494F10243f0F12e22DeC0Eb95cC5
-NEXT_PUBLIC_V2_MAINNET_PRICE_ORACLE=0x589255724D4ce034D5d94c2dD4A05EaB11F74F90
-NEXT_PUBLIC_V2_MAINNET_FEATURED_ETF=0xF61E981654AD8868872304A4F617d61E25cEf69B
-NEXT_PUBLIC_V2_MAINNET_USDT=0x55d398326f99059fF775485246999027B3197955
-```
+V2 mainnet contract addresses and the WalletConnect project ID are fixed in code so GitHub -> Vercel deployments do not depend on dashboard environment variables.
 
-See `.env.example` for the committed template.
+`.env.local` is optional for local experimentation only.
 
 ## Local Development
 
@@ -73,7 +64,7 @@ Recommended Vercel setup:
 - Install Command: `npm install`
 - Output Directory: leave default
 
-Add the same `NEXT_PUBLIC_*` environment variables from above in the Vercel project settings before deploying.
+No required Vercel environment variables for the main app.
 
 ## Project Structure
 

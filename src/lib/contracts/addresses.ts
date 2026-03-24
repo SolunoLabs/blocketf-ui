@@ -1,12 +1,5 @@
 export type Address = `0x${string}`;
 
-function parseEnvAddress(value?: string): Address | null {
-  if (!value) return null;
-  if (!/^0x[a-fA-F0-9]{40}$/.test(value)) return null;
-
-  return value as Address;
-}
-
 export const contractAddresses = {
   // BSC Testnet addresses - Updated 2025-10-11 (Router v2)
   97: {
@@ -95,42 +88,25 @@ export interface V2ContractsConfig {
   usdt: Address;
 }
 
-function resolveV2ContractsConfig(chainId: SupportedChainId): V2ContractsConfig {
-  const env =
-    chainId === 56
-      ? {
-          factory: process.env.NEXT_PUBLIC_V2_MAINNET_FACTORY,
-          router: process.env.NEXT_PUBLIC_V2_MAINNET_ROUTER,
-          rebalancer: process.env.NEXT_PUBLIC_V2_MAINNET_REBALANCER,
-          lens: process.env.NEXT_PUBLIC_V2_MAINNET_LENS,
-          priceOracle: process.env.NEXT_PUBLIC_V2_MAINNET_PRICE_ORACLE,
-          featuredETFAddress: process.env.NEXT_PUBLIC_V2_MAINNET_FEATURED_ETF,
-          usdt: process.env.NEXT_PUBLIC_V2_MAINNET_USDT,
-        }
-      : {
-          factory: process.env.NEXT_PUBLIC_V2_TESTNET_FACTORY,
-          router: process.env.NEXT_PUBLIC_V2_TESTNET_ROUTER,
-          rebalancer: process.env.NEXT_PUBLIC_V2_TESTNET_REBALANCER,
-          lens: process.env.NEXT_PUBLIC_V2_TESTNET_LENS,
-          priceOracle: process.env.NEXT_PUBLIC_V2_TESTNET_PRICE_ORACLE,
-          featuredETFAddress: process.env.NEXT_PUBLIC_V2_TESTNET_FEATURED_ETF,
-          usdt: process.env.NEXT_PUBLIC_V2_TESTNET_USDT,
-        };
-
-  return {
-    factory: parseEnvAddress(env.factory) ?? null,
-    router: parseEnvAddress(env.router) ?? null,
-    rebalancer: parseEnvAddress(env.rebalancer) ?? null,
-    lens: parseEnvAddress(env.lens) ?? null,
-    priceOracle: parseEnvAddress(env.priceOracle) ?? null,
-    featuredETFAddress: parseEnvAddress(env.featuredETFAddress) ?? null,
-    usdt: parseEnvAddress(env.usdt) ?? contractAddresses[chainId].usdt,
-  };
-}
-
 export const v2ContractAddresses: Record<SupportedChainId, V2ContractsConfig> = {
-  97: resolveV2ContractsConfig(97),
-  56: resolveV2ContractsConfig(56),
+  97: {
+    factory: null,
+    router: null,
+    rebalancer: null,
+    lens: null,
+    priceOracle: null,
+    featuredETFAddress: null,
+    usdt: contractAddresses[97].usdt,
+  },
+  56: {
+    factory: '0x1362EF9Bf354E4CdEc2385fB341091a546874648',
+    router: '0x830Fd956dcB3f4F00325BA024AB7D2665faDA6C1',
+    rebalancer: '0xcFf620c18af87dC5aF8959C0A4Ece22BE0702231',
+    lens: '0xc3901bbB95B9494F10243f0F12e22DeC0Eb95cC5',
+    priceOracle: '0x589255724D4ce034D5d94c2dD4A05EaB11F74F90',
+    featuredETFAddress: '0xF61E981654AD8868872304A4F617d61E25cEf69B',
+    usdt: '0x55d398326f99059fF775485246999027B3197955',
+  },
 };
 
 export function getSupportedChainId(chainId?: number): SupportedChainId {
