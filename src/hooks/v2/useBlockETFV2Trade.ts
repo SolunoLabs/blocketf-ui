@@ -171,10 +171,8 @@ export function useBlockETFV2Trade(etfAddress?: Address | null, mode: V2TradeMod
   async function submitTrade() {
     if (!address || !hasTradeConfig || parsedAmount === 0n || !isQuoteReady) return
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 600)
-    const tradeArgs =
-      mode === 'invest'
-        ? [targetETF, parsedAmount, minimumShares, deadline]
-        : [targetETF, parsedAmount, minimumUsdt, deadline]
+    const investArgs = [targetETF, parsedAmount, minimumShares, deadline] as const
+    const redeemArgs = [targetETF, parsedAmount, minimumUsdt, deadline] as const
 
     console.debug('[BlockETF V2 Trade]', {
       mode,
@@ -192,13 +190,13 @@ export function useBlockETFV2Trade(etfAddress?: Address | null, mode: V2TradeMod
             address: routerAddress,
             abi: blockETFV2RouterABI,
             functionName: 'mintWithUSDT',
-            args: tradeArgs,
+            args: investArgs,
           })
         : await writeContractAsync({
             address: routerAddress,
             abi: blockETFV2RouterABI,
             functionName: 'burnToUSDT',
-            args: tradeArgs,
+            args: redeemArgs,
           })
 
     setTransactionKind('trade')

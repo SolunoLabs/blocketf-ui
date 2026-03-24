@@ -108,7 +108,6 @@ export function ETFDetailPage({ etfAddress, featured = false }: ETFDetailPagePro
           <V2TradePanel
             etfAddress={etf.etfAddress}
             etfSymbol={etf.etfSymbol}
-            shareValue={etf.shareValue}
             paused={etf.isPaused}
           />
         </section>
