@@ -381,6 +381,16 @@ export const blockETFV2RouterABI = [
   },
 ] as const;
 
+export const blockETFV2RebalancerABI = [
+  {
+    inputs: [{ name: 'etf', type: 'address' }],
+    name: 'executeRebalance',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+
 export const priceOracleABI = [
   {
     inputs: [{ name: 'token', type: 'address' }],

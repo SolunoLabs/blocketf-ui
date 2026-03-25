@@ -114,7 +114,12 @@ export function ETFDetailPage({ etfAddress, featured = false }: ETFDetailPagePro
 
         {!etf.hasLiveConfig ? <V2NotConfigured /> : null}
 
-        <V2PortfolioTable assets={etf.portfolio} />
+        <V2PortfolioTable
+          assets={etf.portfolio}
+          etfAddress={etf.etfAddress}
+          needsRebalance={etf.needsRebalance}
+          paused={etf.isPaused}
+        />
 
         <V2PositionCard
           userShares={etf.userShares}

@@ -1,3 +1,9 @@
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { Toast } from '@/components/Toast'
+import { blockETFV2RebalancerABI } from '@/lib/contracts/abis'
+import { getV2Contracts, type Address } from '@/lib/contracts/addresses'
 import { formatCompactCurrency, formatTokenAmount, formatWeight, shortAddress } from '@/lib/format'
 
 interface PortfolioAsset {
@@ -11,16 +17,88 @@ interface PortfolioAsset {
   venusEnabled: boolean
 }
 
-export function V2PortfolioTable({ assets }: { assets: PortfolioAsset[] }) {
+export function V2PortfolioTable({
+  assets,
+  etfAddress,
+  needsRebalance,
+  paused,
+}: {
+  assets: PortfolioAsset[]
+  etfAddress?: Address | null
+  needsRebalance?: boolean
+  paused?: boolean
+}) {
+  const chainId = useChainId()
+  const queryClient = useQueryClient()
+  const { writeContractAsync } = useWriteContract()
+  const [pendingHash, setPendingHash] = useState<`0x${string}` | undefined>()
+  const contracts = getV2Contracts(chainId)
+  const rebalancer = contracts.rebalancer
+  const canRebalance = !!etfAddress && !!rebalancer && !!needsRebalance && !paused
+
+  const { isLoading: isConfirming, isSuccess, isError, error } = useWaitForTransactionReceipt({
+    hash: pendingHash,
+  })
+
+  useEffect(() => {
+    if (!isSuccess) return
+    void queryClient.refetchQueries()
+  }, [isSuccess, queryClient])
+
+  async function handleRebalance() {
+    if (!etfAddress || !rebalancer || !canRebalance) return
+
+    const hash = await writeContractAsync({
+      address: rebalancer,
+      abi: blockETFV2RebalancerABI,
+      functionName: 'executeRebalance',
+      args: [etfAddress],
+    })
+
+    setPendingHash(hash)
+  }
+
+  const buttonClass =
+    canRebalance
+      ? 'border-amber-300/28 bg-[linear-gradient(135deg,rgba(251,191,36,0.22)_0%,rgba(249,115,22,0.16)_100%)] text-amber-100 shadow-[0_18px_38px_rgba(245,158,11,0.18)] hover:border-amber-200/40 hover:bg-[linear-gradient(135deg,rgba(251,191,36,0.28)_0%,rgba(249,115,22,0.2)_100%)]'
+      : 'border-white/8 bg-white/6 text-slate-500'
+
   return (
     <div className="overflow-hidden rounded-[2.4rem] border border-violet-300/16 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.18),transparent_24%),radial-gradient(circle_at_top_left,rgba(56,189,248,0.08),transparent_20%),linear-gradient(180deg,rgba(10,17,29,0.98)_0%,rgba(5,11,18,1)_100%)] shadow-[0_26px_80px_rgba(4,9,19,0.34)]">
+      <Toast
+        isOpen={!!pendingHash}
+        type={isError ? 'error' : isSuccess ? 'success' : 'loading'}
+        message={
+          isError
+            ? error instanceof Error
+              ? error.message
+              : 'Rebalance failed'
+            : isSuccess
+              ? 'Rebalance confirmed.'
+              : 'Rebalance transaction pending'
+        }
+        txHash={pendingHash}
+        chainId={chainId}
+        onClose={() => setPendingHash(undefined)}
+      />
+
       <div className="border-b border-white/8 px-6 py-6 sm:px-7">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200">Allocation</div>
-          <h3 className="mt-2 text-[2rem] font-semibold tracking-[-0.04em] text-white">Portfolio Composition</h3>
-          <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-300">
-            Current and target weights are shown side by side so rebalance pressure is visible.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-200">Allocation</div>
+            <h3 className="mt-2 text-[2rem] font-semibold tracking-[-0.04em] text-white">Portfolio Composition</h3>
+            <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-300">
+              Current and target weights are shown side by side so rebalance pressure is visible.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleRebalance()}
+            disabled={!canRebalance || isConfirming}
+            className={`mt-6 inline-flex min-h-[3rem] items-center justify-center self-start rounded-full border px-5 py-3 text-base font-semibold transition ${buttonClass} disabled:cursor-not-allowed disabled:shadow-none`}
+          >
+            {isConfirming ? 'Rebalancing...' : 'Execute Rebalance'}
+          </button>
         </div>
       </div>
 
