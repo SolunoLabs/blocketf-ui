@@ -191,12 +191,14 @@ export function useBlockETFV2Trade(etfAddress?: Address | null, mode: V2TradeMod
             abi: blockETFV2RouterABI,
             functionName: 'mintWithUSDT',
             args: investArgs,
+            gas: 5_000_000n,
           })
         : await writeContractAsync({
             address: routerAddress,
             abi: blockETFV2RouterABI,
             functionName: 'burnToUSDT',
             args: redeemArgs,
+            gas: 5_000_000n,
           })
 
     setTransactionKind('trade')
