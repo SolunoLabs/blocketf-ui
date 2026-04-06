@@ -10,7 +10,10 @@ import { SiteFooter } from '@/components/shared/SiteFooter'
 import { V2NotConfigured } from './V2NotConfigured'
 import { V2TradePanel } from './V2TradePanel'
 import { V2PortfolioTable } from './V2PortfolioTable'
-import { V2PositionCard } from './V2PositionCard'
+import { V2PerformanceChart } from './V2PerformanceChart'
+import { V2PositionSummary } from './V2PositionSummary'
+import { V2YieldCurve } from './V2YieldCurve'
+import { V2TransactionHistory } from './V2TransactionHistory'
 
 interface ETFDetailPageProps {
   etfAddress?: Address | null
@@ -114,6 +117,8 @@ export function ETFDetailPage({ etfAddress, featured = false }: ETFDetailPagePro
 
         {!etf.hasLiveConfig ? <V2NotConfigured /> : null}
 
+        <V2PerformanceChart etfAddress={etf.etfAddress} etfSymbol={etf.etfSymbol} />
+
         <V2PortfolioTable
           assets={etf.portfolio}
           etfAddress={etf.etfAddress}
@@ -121,11 +126,17 @@ export function ETFDetailPage({ etfAddress, featured = false }: ETFDetailPagePro
           paused={etf.isPaused}
         />
 
-        <V2PositionCard
-          userShares={etf.userShares}
-          positionValue={etf.positionValue}
-          totalSupply={etf.totalSupply}
-        />
+        <section className="flex flex-col gap-6">
+          <V2PositionSummary
+            etfAddress={etf.etfAddress}
+            etfSymbol={etf.etfSymbol}
+          />
+          <V2YieldCurve etfAddress={etf.etfAddress} />
+          <V2TransactionHistory
+            etfAddress={etf.etfAddress}
+            etfSymbol={etf.etfSymbol}
+          />
+        </section>
 
         <section className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-white/8 bg-white/4 p-6 text-sm text-slate-300 backdrop-blur-sm">
           <div>
