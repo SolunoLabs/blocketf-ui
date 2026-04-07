@@ -1,5 +1,5 @@
 const DEFAULT_SUBGRAPH_URL =
-  'https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-06-01'
+  'https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-07-01'
 
 interface GraphQLError {
   message: string
