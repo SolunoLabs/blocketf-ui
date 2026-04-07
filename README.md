@@ -26,11 +26,25 @@ V1 remains available as a legacy route under `/v1`, but V2 is the primary app su
 
 ## Environment Variables
 
-None required for production deployment.
+None required for production deployment under the current setup.
 
 V2 mainnet contract addresses and the WalletConnect project ID are fixed in code so GitHub -> Vercel deployments do not depend on dashboard environment variables.
 
-`.env.local` is optional for local experimentation only.
+The default subgraph endpoint is also fixed in code and currently points to the Studio deployment:
+
+`https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-07-01`
+
+`.env.local` is optional and can be used to override the default subgraph source for local testing:
+
+```bash
+SUBGRAPH_URL=https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-07-01
+```
+
+The app resolves the subgraph URL in this order:
+
+1. `SUBGRAPH_URL`
+2. `NEXT_PUBLIC_SUBGRAPH_URL`
+3. the hardcoded default in `src/lib/subgraph/client.ts`
 
 ## Local Development
 
@@ -64,7 +78,20 @@ Recommended Vercel setup:
 - Install Command: `npm install`
 - Output Directory: leave default
 
-No required Vercel environment variables for the main app.
+No required Vercel environment variables for the main app under the current Studio-based setup.
+
+If BlockETF later moves production querying to The Graph Gateway, the app should be updated to use a server-side API key flow instead of relying on the current default Studio URL.
+
+## Subgraph Data Source
+
+The V2 analytics views, position history, and transaction history read from the BlockETF V2 subgraph rather than from frontend mock data.
+
+Current default deployment:
+
+- Studio query URL: `https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-07-01`
+- Studio page: `https://thegraph.com/studio/subgraph/blocketf-v2`
+
+The transaction `Fee` column only applies to `Redeem` rows. Invest rows intentionally display `—`.
 
 ## Project Structure
 
