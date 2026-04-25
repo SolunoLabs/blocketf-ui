@@ -1,6 +1,3 @@
-const DEFAULT_SUBGRAPH_URL =
-  'https://api.studio.thegraph.com/query/1747541/blocketf-v2/2026-04-07-01'
-
 interface GraphQLError {
   message: string
 }
@@ -11,7 +8,15 @@ interface GraphQLResponse<T> {
 }
 
 export function getSubgraphUrl() {
-  return process.env.SUBGRAPH_URL || process.env.NEXT_PUBLIC_SUBGRAPH_URL || DEFAULT_SUBGRAPH_URL
+  const url = process.env.SUBGRAPH_URL || process.env.NEXT_PUBLIC_SUBGRAPH_URL
+  if (!url) {
+    throw new Error('SUBGRAPH_URL is not configured')
+  }
+  return url
+}
+
+export function getSubgraphApiKey() {
+  return process.env.SUBGRAPH_API_KEY
 }
 
 export function normalizeSubgraphId(value?: string | null) {

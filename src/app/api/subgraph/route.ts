@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSubgraphUrl } from '@/lib/subgraph/client'
+import { getSubgraphApiKey, getSubgraphUrl } from '@/lib/subgraph/client'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
+    }
+    const apiKey = getSubgraphApiKey()
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
     const response = await fetch(getSubgraphUrl(), {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(body),
       cache: 'no-store',
     })
