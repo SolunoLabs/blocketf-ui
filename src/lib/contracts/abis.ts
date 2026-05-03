@@ -266,6 +266,16 @@ export const blockETFV2LensABI = [
   },
   {
     inputs: [{ name: 'etf', type: 'address' }],
+    name: 'getAssetRatios',
+    outputs: [
+      { name: 'ratios', type: 'uint256[]' },
+      { name: 'totalValue', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'etf', type: 'address' }],
     name: 'getTotalValue',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',

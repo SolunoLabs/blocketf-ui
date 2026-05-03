@@ -202,6 +202,17 @@ export function useBlockETFV2ETF(etfAddress?: Address | null) {
     query: { enabled: hasETF && hasLens },
   })
 
+  // Lens.getRebalanceInfo zeroes out the weight arrays during the post-rebalance
+  // cooldown window, so read current ratios from getAssetRatios (no cooldown gate)
+  // and pull target weights directly from each AssetInfo.weight.
+  const { data: assetRatiosData } = useReadContract({
+    address: lens,
+    abi: blockETFV2LensABI,
+    functionName: 'getAssetRatios',
+    args: [etf],
+    query: { enabled: hasETF && hasLens },
+  })
+
   const { data: etfLevel } = useReadContract({
     address: factory,
     abi: blockETFV2FactoryABI,
@@ -289,8 +300,7 @@ export function useBlockETFV2ETF(etfAddress?: Address | null) {
   })
 
   const portfolio = useMemo(() => {
-    const currentWeights = rebalanceInfo?.[0] ?? []
-    const targetWeights = rebalanceInfo?.[1] ?? []
+    const ratios = assetRatiosData?.[0] ?? []
 
     return (assets ?? []).map((asset, index) => {
       const price = prices?.[index]
@@ -303,10 +313,9 @@ export function useBlockETFV2ETF(etfAddress?: Address | null) {
         asset.vToken !== EMPTY_ADDRESS && exchangeRate
           ? (asset.reserve * exchangeRate) / 10n ** 18n
           : asset.reserve
+      const currentWeight = ratios[index] ?? 0n
       const weightedValue =
-        totalValue && currentWeights[index] !== undefined
-          ? (totalValue * (currentWeights[index] ?? 0n)) / 10_000n
-          : undefined
+        totalValue && currentWeight > 0n ? (totalValue * currentWeight) / 10_000n : undefined
       const priceBasedValue = price ? (actualReserve * price) / 10n ** BigInt(decimals) : undefined
       const value = weightedValue && weightedValue > 0n ? weightedValue : priceBasedValue
 
@@ -317,12 +326,12 @@ export function useBlockETFV2ETF(etfAddress?: Address | null) {
         price,
         value,
         reserve: actualReserve,
-        currentWeight: currentWeights[index] ?? 0n,
-        targetWeight: targetWeights[index] ?? BigInt(asset.weight),
+        currentWeight,
+        targetWeight: BigInt(asset.weight),
         venusEnabled: asset.vToken !== EMPTY_ADDRESS,
       }
     })
-  }, [assets, decimalResults, exchangeRateResults, prices, rebalanceInfo, symbolResults, totalValue])
+  }, [assets, assetRatiosData, decimalResults, exchangeRateResults, prices, symbolResults, totalValue])
 
   const positionValue = useMemo(() => {
     if (!userShares || !shareValue) return undefined
